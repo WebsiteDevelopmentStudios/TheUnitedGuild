@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blemms randon Generators</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      /* Stronger red space background */
+      background: radial-gradient(circle at 50% 50%, #550000 0%, #220000 40%, #000000 100%);
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      width: 350px;
+      margin: 40px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section {
+      background: rgba(60, 0, 0, 0.85);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(255,0,0,0.4);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #ff6666;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #ff1a1a;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #cc0000;
+    }
+
+    .output {
+      margin-top: 10px;
+      font-size: 16px;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<div class="container">
+
+  <div class="section">
+    <h2>Coordinates</h2>
+    <div class="output" id="coords">Click to generate</div>
+    <button onclick="generateCoords()">Generate</button>
+  </div>
+
+  <div class="section">
+    <h2>Seed</h2>
+    <div class="output" id="seed">Click to generate</div>
+    <button onclick="generateSeed()">Generate</button>
+  </div>
+
+  <div class="section">
+    <h2>Username</h2>
+    <div class="output" id="username">Click to generate</div>
+    <button onclick="generateUsername()">Generate</button>
+  </div>
+
+  <div class="section">
+    <h2>UUID</h2>
+    <div class="output" id="uuid">Click to generate</div>
+    <button onclick="generateUUID()">Generate</button>
+  </div>
+
+  <div class="section">
+    <h2>Minecraft Tip</h2>
+    <div class="output" id="tip">Click to generate</div>
+    <button onclick="generateTip()">Generate</button>
+  </div>
+
+</div>
+
+<script>
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateCoords() {
+    const x = randomInt(-10000, 10000);
+    const y = randomInt(0, 255);
+    const z = randomInt(-10000, 10000);
+    document.getElementById("coords").innerText = `${x}, ${y}, ${z}`;
+  }
+
+  function generateSeed() {
+    const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER) * (Math.random() < 0.5 ? -1 : 1);
+    document.getElementById("seed").innerText = seed;
+  }
+
+  function generateUsername() {
+    const adjectives = ["Swift","Dark","Epic","Crazy","Silent","Frosty","Wild","Shadow","Electric","Lucky"];
+    const nouns = ["Wolf","Ninja","Dragon","Miner","Builder","Creeper","Knight","Falcon","Tiger","Wizard"];
+
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const number = Math.random() < 0.5 ? randomInt(0, 9999) : "";
+
+    document.getElementById("username").innerText = adj + noun + number;
+  }
+
+  function generateUUID() {
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+
+    document.getElementById("uuid").innerText = uuid;
+  }
+
+  // BETTER PARTICLES (brighter + more visible)
+  const canvas = document.getElementById("particles");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  const particles = [];
+
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 3 + 1,
+      speed: Math.random() * 1 + 0.3,
+      opacity: Math.random() * 0.8 + 0.2
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let p of particles) {
+      p.y -= p.speed;
+
+      if (p.y < 0) {
+        p.y = canvas.height;
+        p.x = Math.random() * canvas.width;
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 80, 80, ${p.opacity})`;
+      ctx.shadowColor = 'red';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  // ===== Minecraft Tips =====
+  function generateTip() {
+    const tips = [
+      "Always carry a water bucket to prevent fall damage.",
+      "Place torches to stop mobs from spawning in dark areas.",
+      "Use shields to block Creeper explosions and skeleton arrows.",
+      "Cook food before eating for better hunger restoration.",
+      "Bring a bed to skip the night and set your spawn point.",
+      "Use coordinates (F3) to avoid getting lost.",
+      "Strip mining at Y= -58 is great for diamonds in newer versions.",
+      "Keep a chest at your base for backup gear.",
+      "Use boats to safely move villagers.",
+      "Enchant your gear early for a big advantage.",
+      "Always carry blocks to pillar up or escape mobs.",
+      "Use fences to protect animals from hostile mobs.",
+      "Smelt iron early to craft better tools and armor.",
+      "Use compasses to find your spawn point.",
+      "Build with slabs to prevent mob spawning on surfaces."
+    ];
+
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    document.getElementById("tip").innerText = tip;
+  }
+</script>
+
+  <!-- Floating Profile Icon -->
+  <div class="floating-profile">
+    <img src="https://mc-heads.net/avatar/Steve" alt="profile">
+    <div class="quote">"Stay mining, stay winning."</div>
+  </div>
+
+  <style>
+    .floating-profile {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      text-align: center;
+      z-index: 2;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-profile img {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px red;
+    }
+
+    .quote {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #ff9999;
+      max-width: 120px;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+  </style>
+</body>
+</html>
