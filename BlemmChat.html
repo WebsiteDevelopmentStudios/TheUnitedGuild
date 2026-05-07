@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Discord Hybrid+</title>
+
+<style>
+:root {
+    --bg-main: #2f3136;
+    --bg-elevated: #36393f;
+    --bg-sidebar: #202225;
+    --bg-header: #2f3136;
+    --bg-input: #40444b;
+    --accent: #7289da;
+    --accent-soft: #4f545c;
+    --danger: #ff4b4b;
+    --text-main: #ffffff;
+    --text-muted: #b9bbbe;
+    --text-subtle: #72767d;
+    --border-subtle: #111;
+    --badge-bg: #ff4b4b;
+    --badge-text: #ffffff;
+}
+
+body.red-theme {
+    --accent: #ff4b4b;
+    --accent-soft: #5a2b2b;
+    --badge-bg: #ff4b4b;
+}
+
+body.blue-theme {
+    --accent: #4b7bff;
+    --accent-soft: #4f545c;
+    --badge-bg: #4b7bff;
+}
+
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+/* SERVER BAR */
+#serverBar {
+    width: 80px;
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    border-right: 1px solid var(--border-subtle);
+}
+
+.serverIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #36393f;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 20px;
+    color: var(--text-main);
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: 0.15s;
+}
+
+.serverIcon.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+}
+
+.serverIcon:hover {
+    transform: scale(1.05);
+    border-color: var(--accent-soft);
+}
+
+.serverIcon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* CHANNEL PANE */
+#channelPane {
+    width: 280px;
+    background: #2f3136;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-subtle);
+}
+
+#serverTitleBar {
+    padding: 10px 12px;
+    background: #202225;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#serverTitle {
+    font-weight: bold;
+}
+
+#serverControls {
+    display: flex;
+    gap: 4px;
+}
+
+#serverControls button {
+    background: var(--accent-soft);
+    border: none;
+    color: var(--text-main);
+    padding: 3px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+#serverControls button:hover {
+    background: var(--accent);
+}
+
+#channelHeader {
+    padding: 6px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    display: flex;
+    justify-content: space-between;
+}
+
+.channelItem {
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+}
+
+.channelItem.active {
+    background: #393c43;
+    color: var(--text-main);
+    border-left: 3px solid var(--accent);
+}
+
+.channelItem:hover {
+    background: #3a3d45;
+}
+
+/* DM LIST */
+#dmHeader {
+    padding: 8px 12px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    display: flex;
+    justify-content: space-between;
+}
+
+.dmItem {
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+}
+
+.dmItem.active {
+    background: #393c43;
+    color: var(--text-main);
+}
+
+.dmItem:hover {
+    background: #3a3d45;
+}
+
+/* USER BAR */
+#userBar {
+    padding: 8px 12px;
+    background: #292b2f;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#userInfo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#userAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+#userAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#themeToggle {
+    background: var(--accent-soft);
+    border: none;
+    color: var(--text-main);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#themeToggle:hover {
+    background: var(--accent);
+}
+
+/* CHAT AREA */
+#chatArea {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-elevated);
+}
+
+#chatHeader {
+    padding: 10px 14px;
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#chatTitle {
+    font-weight: bold;
+}
+
+#chatSub {
+    font-size: 12px;
+    color: var(--text-subtle);
+}
+
+/* TYPING INDICATOR */
+#typingIndicator {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.typingBubble {
+    width: 26px;
+    height: 16px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.typingDot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-main);
+    opacity: 0.3;
+    animation: typingBlink 1s infinite;
+}
+
+.typingDot:nth-child(2) { animation-delay: 0.2s; }
+.typingDot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBlink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+#messages {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+}
+
+.msgRow {
+    margin-bottom: 10px;
+    display: flex;
+}
+
+.msgRow.me {
+    flex-direction: row-reverse;
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 8px;
+    overflow: hidden;
+}
+
+.msgBubble {
+    background: var(--accent-soft);
+    padding: 6px 8px;
+    border-radius: 6px;
+    max-width: 70%;
+}
+
+.msgRow.me .msgBubble {
+    background: var(--accent);
+}
+
+.msgText .mention {
+    color: var(--danger);
+    font-weight: bold;
+}
+
+/* INPUT BAR */
+#inputBar {
+    padding: 10px;
+    background: var(--bg-input);
+    display: flex;
+    gap: 8px;
+}
+
+#msgInput {
+    flex: 1;
+    padding: 10px;
+    border-radius: 4px;
+    border: none;
+    background: #40444b;
+    color: var(--text-main);
+}
+
+#sendBtn {
+    padding: 10px 16px;
+    border-radius: 4px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+}
+
+#sendBtn:hover {
+    background: #5b6eae;
+}
+
+/* LOGIN OVERLAY */
+#loginOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+#loginBox {
+    background: #2f3136;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    border: 1px solid var(--accent-soft);
+}
+
+#loginBox input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    background: #202225;
+    border: none;
+    border-radius: 4px;
+    color: var(--text-main);
+}
+
+#loginBox button {
+    width: 100%;
+    padding: 8px;
+    background: var(--accent);
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+}
+
+#errorLabel {
+    color: var(--danger);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* MODALS */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 30;
+}
+
+.modal {
+    background: #2f3136;
+    padding: 16px;
+    border-radius: 8px;
+    width: 360px;
+    border: 1px solid var(--accent-soft);
+}
+
+.modal input {
+    width: 100%;
+    padding: 6px;
+    background: #202225;
+    border: none;
+    border-radius: 4px;
+    color: var(--text-main);
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.btnPrimary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btnSecondary {
+    background: #3a3d45;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* ERROR CONSOLE */
+#errorConsole {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    background: #111;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 12px;
+    overflow-y: auto;
+    padding: 6px;
+    display: none;
+    border-top: 2px solid #444;
+    z-index: 9999;
+}
+
+#toggleConsole {
+    position: fixed;
+    bottom: 210px;
+    right: 10px;
+    padding: 6px 10px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 9999;
+}
+</style>
+</head>
+
+<body class="blue-theme">
+
+<!-- LOGIN -->
+<div id="loginOverlay">
+    <div id="loginBox">
+        <h2>Discord Hybrid+</h2>
+        <input id="loginUser" placeholder="Username">
+        <input id="loginPass" placeholder="Password" type="password">
+        <button id="loginBtn">Login</button>
+        <div id="errorLabel"></div>
+    </div>
+</div>
+
+<!-- SERVER BAR -->
+<div id="serverBar">
+    <div class="serverIcon" id="createServerBtn">+</div>
+    <div class="serverIcon" id="joinServerBtn" title="Join via invite">?</div>
+</div>
+
+<!-- CHANNEL PANE -->
+<div id="channelPane">
+    <div id="serverTitleBar">
+        <div id="serverTitle">No server</div>
+        <div id="serverControls">
+            <button id="serverSettingsBtn">Server</button>
+            <button id="rolesBtn">Roles</button>
+            <button id="inviteBtn">Invite</button>
+        </div>
+    </div>
+
+    <div id="channelHeader">
+        <span>Text Channels</span>
+        <button id="createChannelBtn" style="background:none;border:none;color:var(--text-subtle);cursor:pointer;font-size:16px;">+</button>
+    </div>
+
+    <div id="channelList"></div>
+
+    <div id="dmHeader">
+        <span>Direct Messages</span>
+        <span id="dmHeaderBadge"></span>
+    </div>
+
+    <div id="dmList"></div>
+
+    <div id="userBar">
+        <div id="userInfo">
+            <div id="userAvatar"><span>?</span></div>
+            <span id="userLabel">Not logged in</span>
+        </div>
+        <button id="themeToggle">Theme</button>
+    </div>
+</div>
+
+<!-- CHAT AREA -->
+<div id="chatArea">
+    <div id="chatHeader">
+        <div id="chatTitle">Welcome</div>
+        <div id="chatSub">Login and select a server, channel, or DM</div>
+        <div id="typingIndicator" style="display:none;">
+            <div class="typingBubble">
+                <div class="typingDot"></div>
+                <div class="typingDot"></div>
+                <div class="typingDot"></div>
+            </div>
+            <span id="typingText"></span>
+        </div>
+    </div>
+
+    <div id="messages"></div>
+
+    <div id="inputBar">
+        <input id="msgInput" placeholder="Message... (use @name to mention)">
+        <button id="sendBtn">Send</button>
+    </div>
+</div>
+
+<!-- SERVER MODAL -->
+<div id="serverModalOverlay" class="modalOverlay">
+    <div class="modal">
+        <h3 id="serverModalTitle">Create Server</h3>
+        <div class="modalRow">
+            <label>Server Name</label>
+            <input id="serverNameInput">
+        </div>
+        <div class="modalRow">
+            <label>Server Icon</label>
+            <input id="serverIconInput" type="file" accept="image/*">
+        </div>
+        <div class="modalActions">
+            <button class="btnSecondary" id="serverModalCancel">Cancel</button>
+            <button class="btnPrimary" id="serverModalSave">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- ROLES MODAL -->
+<div id="rolesModalOverlay" class="modalOverlay">
+    <div class="modal">
+        <h3>Roles</h3>
+        <div class="modalRow">
+            <label>Role Name</label>
+            <input id="roleNameInput">
+        </div>
+        <div class="modalRow">
+            <label>Role Color</label>
+            <input id="roleColorInput" type="color" value="#7289da">
+        </div>
+        <div class="modalRow">
+            <label>Permissions</label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;font-size:11px;">
+                <label><input type="checkbox" class="permCheckbox" value="manage_server"> manage_server</label>
+                <label><input type="checkbox" class="permCheckbox" value="manage_roles"> manage_roles</label>
+                <label><input type="checkbox" class="permCheckbox" value="manage_channels"> manage_channels</label>
+                <label><input type="checkbox" class="permCheckbox" value="kick_members"> kick_members</label>
+                <label><input type="checkbox" class="permCheckbox" value="ban_members"> ban_members</label>
+                <label><input type="checkbox" class="permCheckbox" value="send_messages" checked> send_messages</label>
+            </div>
+        </div>
+        <div class="modalRow">
+            <label>Assign to User</label>
+            <input id="roleAssignUserInput" placeholder="Username">
+        </div>
+        <div class="modalActions">
+            <button class="btnSecondary" id="rolesModalClose">Close</button>
+            <button class="btnPrimary" id="rolesModalCreate">Create + Assign</button>
+        </div>
+    </div>
+</div>
+
+<!-- AVATAR MODAL -->
+<div id="avatarModalOverlay" class="modalOverlay">
+    <div class="modal">
+        <h3>Set Profile Picture</h3>
+        <div class="modalRow">
+            <label>Upload Image</label>
+            <input id="avatarInput" type="file" accept="image/*">
+        </div>
+        <div class="modalActions">
+            <button class="btnSecondary" id="avatarModalCancel">Cancel</button>
+            <button class="btnPrimary" id="avatarModalSave">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- INVITE MODAL -->
+<div id="inviteModalOverlay" class="modalOverlay">
+    <div class="modal">
+        <h3>Server Invite</h3>
+        <div class="modalRow">
+            <label>Invite Code</label>
+            <input id="inviteCodeOutput" readonly>
+        </div>
+        <div class="modalActions">
+            <button class="btnPrimary" id="inviteModalClose">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- JOIN SERVER MODAL -->
+<div id="joinModalOverlay" class="modalOverlay">
+    <div class="modal">
+        <h3>Join Server</h3>
+        <div class="modalRow">
+            <label>Invite Code</label>
+            <input id="joinCodeInput" placeholder="Paste invite code">
+        </div>
+        <div class="modalActions">
+            <button class="btnSecondary" id="joinModalCancel">Cancel</button>
+            <button class="btnPrimary" id="joinModalJoin">Join</button>
+        </div>
+    </div>
+</div>
+
+<!-- ERROR CONSOLE -->
+<div id="errorConsole"></div>
+<button id="toggleConsole">Console</button>
+
+<!-- SCRIPT BLOCK 1 (STATE + HELPERS) -->
+<script>
+const API = "https://shopping-verse-bloggers-news.trycloudflare.com";
+const STORAGE_KEY = "discord_hybrid_state_v3";
+
+let state = {
+    currentUser: null,
+    currentServer: null,
+    currentChannel: null,
+    currentDM: null,
+    mode: "channel",
+    servers: {},
+    notifications: null
+};
+
+let typingTimer = null;
+let typingActive = false;
+let typingPollTimer = null;
+let notifTimer = null;
+
+/* DOM ELEMENTS */
+const loginOverlay = document.getElementById("loginOverlay");
+const loginUserInput = document.getElementById("loginUser");
+const loginPassInput = document.getElementById("loginPass");
+const loginBtnEl = document.getElementById("loginBtn");
+const errorLabel = document.getElementById("errorLabel");
+
+const serverBar = document.getElementById("serverBar");
+const createServerBtn = document.getElementById("createServerBtn");
+const joinServerBtn = document.getElementById("joinServerBtn");
+
+const serverTitle = document.getElementById("serverTitle");
+const serverSettingsBtn = document.getElementById("serverSettingsBtn");
+const rolesBtn = document.getElementById("rolesBtn");
+const inviteBtn = document.getElementById("inviteBtn");
+
+const channelList = document.getElementById("channelList");
+const createChannelBtn = document.getElementById("createChannelBtn");
+
+const dmList = document.getElementById("dmList");
+const dmHeaderBadge = document.getElementById("dmHeaderBadge");
+
+const userAvatar = document.getElementById("userAvatar");
+const userLabel = document.getElementById("userLabel");
+const themeToggle = document.getElementById("themeToggle");
+
+const chatTitle = document.getElementById("chatTitle");
+const chatSub = document.getElementById("chatSub");
+const typingIndicator = document.getElementById("typingIndicator");
+const typingText = document.getElementById("typingText");
+
+const messagesDiv = document.getElementById("messages");
+const msgInput = document.getElementById("msgInput");
+const sendBtnEl = document.getElementById("sendBtn");
+
+/* MODALS */
+const serverModalOverlay = document.getElementById("serverModalOverlay");
+const serverModalTitle = document.getElementById("serverModalTitle");
+const serverNameInput = document.getElementById("serverNameInput");
+const serverIconInput = document.getElementById("serverIconInput");
+const serverModalCancel = document.getElementById("serverModalCancel");
+const serverModalSave = document.getElementById("serverModalSave");
+
+const rolesModalOverlay = document.getElementById("rolesModalOverlay");
+const roleNameInput = document.getElementById("roleNameInput");
+const roleColorInput = document.getElementById("roleColorInput");
+const rolesModalClose = document.getElementById("rolesModalClose");
+const rolesModalCreate = document.getElementById("rolesModalCreate");
+const roleAssignUserInput = document.getElementById("roleAssignUserInput");
+const permCheckboxes = document.querySelectorAll(".permCheckbox");
+
+const avatarModalOverlay = document.getElementById("avatarModalOverlay");
+const avatarInput = document.getElementById("avatarInput");
+const avatarModalCancel = document.getElementById("avatarModalCancel");
+const avatarModalSave = document.getElementById("avatarModalSave");
+
+const inviteModalOverlay = document.getElementById("inviteModalOverlay");
+const inviteCodeOutput = document.getElementById("inviteCodeOutput");
+const inviteModalClose = document.getElementById("inviteModalClose");
+
+const joinModalOverlay = document.getElementById("joinModalOverlay");
+const joinCodeInput = document.getElementById("joinCodeInput");
+const joinModalCancel = document.getElementById("joinModalCancel");
+const joinModalJoin = document.getElementById("joinModalJoin");
+
+/* ERROR CONSOLE */
+const consoleDiv = document.getElementById("errorConsole");
+const toggleConsoleBtn = document.getElementById("toggleConsole");
+
+toggleConsoleBtn.onclick = () => {
+    consoleDiv.style.display =
+        consoleDiv.style.display === "none" ? "block" : "none";
+};
+
+function logToScreen(type, msg) {
+    const line = document.createElement("div");
+    line.textContent = `[${type}] ${msg}`;
+    consoleDiv.appendChild(line);
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+}
+
+const oldLog = console.log;
+console.log = function(...args) {
+    oldLog.apply(console, args);
+    logToScreen("LOG", args.join(" "));
+};
+
+const oldErr = console.error;
+console.error = function(...args) {
+    oldErr.apply(console, args);
+    logToScreen("ERROR", args.join(" "));
+};
+
+window.onerror = function(msg, src, line, col, err) {
+    logToScreen("RUNTIME", `${msg} @ ${line}:${col}`);
+};
+
+/* STATE STORAGE */
+function loadState() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            state = Object.assign(state, parsed);
+        }
+    } catch (e) {
+        console.error("Failed to load state", e);
+    }
+}
+
+function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+</script>
+
+<!-- SCRIPT BLOCK 2 (ALL LOGIC) -->
+<script>
+/* ============================
+   LOGIN
+============================ */
+loginBtnEl.addEventListener("click", async () => {
+    const username = loginUserInput.value.trim();
+    const password = loginPassInput.value.trim();
+    errorLabel.textContent = "";
+
+    if (!username || !password) {
+        errorLabel.textContent = "Enter username and password.";
+        return;
+    }
+
+    try {
+        const res = await fetch(API + "/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            errorLabel.textContent = data.message || "Invalid login";
+            return;
+        }
+
+        state.currentUser = username;
+        saveState();
+        loginOverlay.style.display = "none";
+        userLabel.textContent = username;
+
+        await loadServers();
+        renderServerBar();
+        renderAll();
+        startNotificationLoop();
+        startTypingPoll();
+
+    } catch (e) {
+        errorLabel.textContent = "Cannot reach backend.";
+    }
+});
+
+loginUserInput.addEventListener("keydown", e => { if (e.key === "Enter") loginBtnEl.click(); });
+loginPassInput.addEventListener("keydown", e => { if (e.key === "Enter") loginBtnEl.click(); });
+
+/* ============================
+   LOAD SERVERS
+============================ */
+async function loadServers() {
+    if (!state.currentUser) return;
+    try {
+        const res = await fetch(API + "/servers/list", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: state.currentUser })
+        });
+        const data = await res.json();
+        if (data.success) {
+            state.servers = {};
+            for (const s of data.servers) {
+                state.servers[s.name] = { icon: s.icon, owner: s.owner };
+            }
+            saveState();
+        }
+    } catch (e) {
+        console.error("Failed to load servers", e);
+    }
+}
+
+/* ============================
+   SERVER BAR
+============================ */
+function renderServerBar() {
+    serverBar.innerHTML = "";
+
+    for (const [name, info] of Object.entries(state.servers)) {
+        const div = document.createElement("div");
+        div.className = "serverIcon" + (state.currentServer === name ? " active" : "");
+        div.setAttribute("data-server", name);
+
+        if (info.icon) {
+            const img = document.createElement("img");
+            img.src = info.icon;
+            div.appendChild(img);
+        } else {
+            div.textContent = name.charAt(0).toUpperCase();
+        }
+
+        div.addEventListener("click", () => {
+            state.currentServer = name;
+            state.currentChannel = null;
+            state.currentDM = null;
+            state.mode = "channel";
+            saveState();
+            renderAll();
+        });
+
+        serverBar.appendChild(div);
+    }
+
+    const plus = document.createElement("div");
+    plus.className = "serverIcon";
+    plus.id = "createServerBtn";
+    plus.textContent = "+";
+    plus.addEventListener("click", openCreateServerModal);
+    serverBar.appendChild(plus);
+
+    const join = document.createElement("div");
+    join.className = "serverIcon";
+    join.id = "joinServerBtn";
+    join.textContent = "?";
+    join.addEventListener("click", () => {
+        joinModalOverlay.style.display = "flex";
+    });
+    serverBar.appendChild(join);
+}
+
+/* ============================
+   CREATE SERVER
+============================ */
+function openCreateServerModal() {
+    serverModalTitle.textContent = "Create Server";
+    serverNameInput.value = "";
+    serverIconInput.value = "";
+    serverModalOverlay.style.display = "flex";
+}
+
+serverModalCancel.addEventListener("click", () => {
+    serverModalOverlay.style.display = "none";
+});
+
+serverModalSave.addEventListener("click", async () => {
+    const name = serverNameInput.value.trim();
+    if (!name) return alert("Enter a server name");
+
+    let iconData = null;
+    if (serverIconInput.files.length > 0) {
+        const file = serverIconInput.files[0];
+        iconData = await fileToBase64(file);
+    }
+
+    const res = await fetch(API + "/servers/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            name,
+            owner: state.currentUser
+        })
+    });
+    const data = await res.json();
+    if (!data.success) {
+        alert("Failed: " + (data.message || "Unknown"));
+        return;
+    }
+
+    if (iconData) {
+        await fetch(API + "/upload/serverIcon", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                serverName: name,
+                data: iconData
+            })
+        });
+    }
+
+    serverModalOverlay.style.display = "none";
+    await loadServers();
+    renderServerBar();
+});
+
+/* ============================
+   FILE TO BASE64
+============================ */
+function fileToBase64(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(file);
+    });
+}
+
+/* ============================
+   CHANNELS
+============================ */
+function renderChannels() {
+    channelList.innerHTML = "";
+    if (!state.currentServer) return;
+
+    serverTitle.textContent = state.currentServer;
+
+    fetch(`${API}/channels/${encodeURIComponent(state.currentServer)}/list`)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) return;
+            const channels = data.channels;
+
+            channels.forEach(ch => {
+                const div = document.createElement("div");
+                div.className = "channelItem" + (state.currentChannel === ch ? " active" : "");
+
+                const nameSpan = document.createElement("span");
+                nameSpan.textContent = "# " + ch;
+
+                const badge = document.createElement("span");
+                badge.className = "channelBadge";
+                badge.style.display = "none";
+
+                div.appendChild(nameSpan);
+                div.appendChild(badge);
+
+                div.addEventListener("click", () => {
+                    state.mode = "channel";
+                    state.currentChannel = ch;
+                    state.currentDM = null;
+                    saveState();
+                    renderAll();
+                });
+
+                channelList.appendChild(div);
+            });
+        });
+}
+
+createChannelBtn.addEventListener("click", async () => {
+    if (!state.currentServer) return alert("Select a server first");
+    const ch = prompt("Channel name:");
+    if (!ch) return;
+
+    const res = await fetch(API + "/channels/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            serverName: state.currentServer,
+            channelName: ch,
+            username: state.currentUser
+        })
+    });
+    const data = await res.json();
+    if (!data.success) {
+        alert("Failed: " + (data.message || "Unknown"));
+        return;
+    }
+
+    renderChannels();
+});
+
+/* ============================
+   DMS
+============================ */
+function renderDMs() {
+    dmList.innerHTML = "";
+    if (!state.currentUser) return;
+
+    const dms = state.notifications?.dms || {};
+
+    for (const [other, info] of Object.entries(dms)) {
+        const div = document.createElement("div");
+        div.className = "dmItem" + (state.mode === "dm" && state.currentDM === other ? " active" : "");
+        div.textContent = other;
+
+        if (info.unread > 0) {
+            const badge = document.createElement("span");
+            badge.className = "channelBadge";
+            badge.textContent = info.unread;
+            div.appendChild(badge);
+        }
+
+        div.addEventListener("click", () => {
+            state.mode = "dm";
+            state.currentDM = other;
+            state.currentChannel = null;
+            saveState();
+            renderAll();
+        });
+
+        dmList.appendChild(div);
+    }
+}
+
+/* ============================
+   LOAD CURRENT VIEW
+============================ */
+async function loadCurrentView() {
+    typingIndicator.style.display = "none";
+
+    if (!state.currentUser) {
+        chatTitle.textContent = "Welcome";
+        chatSub.textContent = "Login to start";
+        renderMessages(null);
+        return;
+    }
+
+    if (state.mode === "channel" && state.currentServer && state.currentChannel) {
+        chatTitle.textContent = "# " + state.currentChannel;
+        chatSub.textContent = state.currentServer + " • Channel";
+        const msgs = await fetchChannelMessages(state.currentServer, state.currentChannel);
+        renderMessages(msgs);
+    } else if (state.mode === "dm" && state.currentDM) {
+        chatTitle.textContent = state.currentDM;
+        chatSub.textContent = "Direct Message";
+        const msgs = await fetchDMThread(state.currentUser, state.currentDM);
+        renderMessages(msgs);
+    } else {
+        chatTitle.textContent = "Welcome";
+        chatSub.textContent = "Select a channel or DM";
+        renderMessages(null);
+    }
+}
+
+/* ============================
+   FETCH MESSAGES
+============================ */
+async function fetchChannelMessages(server, channel) {
+    try {
+        const res = await fetch(`${API}/channels/${encodeURIComponent(server)}/${encodeURIComponent(channel)}`);
+        if (!res.ok) return [];
+        return await res.json();
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+}
+
+async function fetchDMThread(user, target) {
+    try {
+        const res = await fetch(`${API}/dms/${encodeURIComponent(user)}/${encodeURIComponent(target)}`);
+        if (!res.ok) return [];
+        return await res.json();
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+}
+
+/* ============================
+   SEND MESSAGE
+============================ */
+sendBtnEl.addEventListener("click", async () => {
+    const text = msgInput.value.trim();
+    if (!text || !state.currentUser) return;
+
+    stopTyping();
+
+    if (state.mode === "channel") {
+        await sendChannelMessage(state.currentServer, state.currentChannel, state.currentUser, text);
+        msgInput.value = "";
+        loadCurrentView();
+    } else if (state.mode === "dm") {
+        await sendDM(state.currentUser, state.currentDM, text);
+        msgInput.value = "";
+        loadCurrentView();
+    }
+});
+
+msgInput.addEventListener("keydown", () => {
+    startTyping();
+});
+
+msgInput.addEventListener("keyup", () => {
+    if (typingTimer) clearTimeout(typingTimer);
+    typingTimer = setTimeout(stopTyping, 1500);
+});
+
+/* ============================
+   SEND CHANNEL MESSAGE
+============================ */
+async function sendChannelMessage(server, channel, from, text) {
+    try {
+        await fetch(`${API}/channels/${encodeURIComponent(server)}/${encodeURIComponent(channel)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                from,
+                text,
+                time: Date.now()
+            })
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+/* ============================
+   SEND DM
+============================ */
+async function sendDM(user, target, text) {
+    try {
+        await fetch(`${API}/dms/${encodeURIComponent(user)}/${encodeURIComponent(target)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                from: user,
+                text,
+                time: Date.now()
+            })
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+/* ============================
+   RENDER MESSAGES
+============================ */
+function renderMessages(messages) {
+    messagesDiv.innerHTML = "";
+
+    if (!messages) return;
+
+    messages.forEach(m => {
+        const row = document.createElement("div");
+        row.className = "msgRow" + (m.from === state.currentUser ? " me" : "");
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = m.from.charAt(0).toUpperCase();
+
+        const bubble = document.createElement("div");
+        bubble.className = "msgBubble";
+
+        const header = document.createElement("div");
+        header.className = "msgHeader";
+        const date = new Date(m.time || Date.now());
+        header.textContent = `${m.from} • ${date.toLocaleTimeString()}`;
+
+        const text = document.createElement("div");
+        text.className = "msgText";
+
+        text.innerHTML = (m.text || "")
+            .replace(/(@\w+)/g, '<span class="mention">$1</span>');
+
+        bubble.appendChild(header);
+        bubble.appendChild(text);
+
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+
+        messagesDiv.appendChild(row);
+    });
+
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+/* ============================
+   NOTIFICATIONS
+============================ */
+async function fetchNotifications() {
+    if (!state.currentUser) return;
+    try {
+        const res = await fetch(API + "/notifications", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: state.currentUser })
+        });
+        const data = await res.json();
+        if (data.success) {
+            state.notifications = data.notifications;
+            saveState();
+        }
+    } catch (e) {
+        console.error("Failed to fetch notifications", e);
+    }
+}
+
+function startNotificationLoop() {
+    if (notifTimer) clearInterval(notifTimer);
+    notifTimer = setInterval(async () => {
+        await fetchNotifications();
+        renderDMs();   // only DMs need live updates
+    }, 2000);
+}
+
+/* ============================
+   AVATAR UPLOAD
+============================ */
+userAvatar.addEventListener("click", () => {
+    avatarModalOverlay.style.display = "flex";
+});
+
+avatarModalCancel.addEventListener("click", () => {
+    avatarModalOverlay.style.display = "none";
+});
+
+avatarModalSave.addEventListener("click", async () => {
+    if (avatarInput.files.length === 0) return;
+
+    const file = avatarInput.files[0];
+    const base64 = await fileToBase64(file);
+
+    await fetch(API + "/upload/avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            username: state.currentUser,
+            data: base64
+        })
+    });
+
+    avatarModalOverlay.style.display = "none";
+    loadAvatar();
+});
+
+/* ============================
+   LOAD AVATAR
+============================ */
+async function loadAvatar() {
+    if (!state.currentUser) return;
+    try {
+        const res = await fetch(API + "/avatar/" + encodeURIComponent(state.currentUser));
+        const data = await res.json();
+        if (data.avatar) {
+            userAvatar.innerHTML = `<img src="${data.avatar}">`;
+        } else {
+            userAvatar.innerHTML = state.currentUser.charAt(0).toUpperCase();
+        }
+    } catch (e) {
+        console.error("Failed to load avatar", e);
+    }
+}
+
+/* ============================
+   ROLES
+============================ */
+rolesBtn.addEventListener("click", () => {
+    rolesModalOverlay.style.display = "flex";
+});
+
+rolesModalClose.addEventListener("click", () => {
+    rolesModalOverlay.style.display = "none";
+});
+
+rolesModalCreate.addEventListener("click", async () => {
+    const roleName = roleNameInput.value.trim();
+    const color = roleColorInput.value;
+    const targetUser = roleAssignUserInput.value.trim();
+
+    const perms = [];
+    permCheckboxes.forEach(cb => {
+        if (cb.checked) perms.push(cb.value);
+    });
+
+    if (!roleName) return alert("Enter a role name");
+
+    const res = await fetch(API + "/roles/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            serverName: state.currentServer,
+            roleName,
+            color,
+            permissions: perms
+        })
+    });
+    const data = await res.json();
+    if (!data.success) {
+        alert("Failed: " + (data.message || "Unknown"));
+        return;
+    }
+
+    if (targetUser) {
+        await fetch(API + "/roles/assign", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                serverName: state.currentServer,
+                targetUser,
+                roleName
+            })
+        });
+    }
+
+    alert("Role created!");
+    rolesModalOverlay.style.display = "none";
+});
+
+/* ============================
+   INVITES
+============================ */
+inviteBtn.addEventListener("click", async () => {
+    if (!state.currentServer) return alert("Select a server first");
+
+    const res = await fetch(API + "/invites/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            serverName: state.currentServer,
+            username: state.currentUser
+        })
+    });
+
+    const data = await res.json();
+    if (!data.success) {
+        alert("Failed: " + (data.message || "Unknown"));
+        return;
+    }
+
+    inviteCodeOutput.value = data.code;
+    inviteModalOverlay.style.display = "flex";
+});
+
+inviteModalClose.addEventListener("click", () => {
+    inviteModalOverlay.style.display = "none";
+});
+
+/* JOIN SERVER */
+joinServerBtn.addEventListener("click", () => {
+    joinModalOverlay.style.display = "flex";
+});
+
+joinModalCancel.addEventListener("click", () => {
+    joinModalOverlay.style.display = "none";
+});
+
+joinModalJoin.addEventListener("click", async () => {
+    const code = joinCodeInput.value.trim();
+    if (!code) return alert("Enter invite code");
+
+    const res = await fetch(API + "/invites/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            code,
+            username: state.currentUser
+        })
+    });
+
+    const data = await res.json();
+    if (!data.success) {
+        alert("Failed: " + (data.message || "Unknown"));
+        return;
+    }
+
+    joinModalOverlay.style.display = "none";
+    await loadServers();
+    renderServerBar();
+});
+
+/* ============================
+   TYPING INDICATORS
+============================ */
+function getTypingTarget() {
+    if (state.mode === "channel") {
+        return {
+            targetType: "channel",
+            target: `${state.currentServer}:${state.currentChannel}`
+        };
+    }
+    if (state.mode === "dm") {
+        return {
+            targetType: "dm",
+            target: state.currentDM
+        };
+    }
+    return null;
+}
+
+async function startTyping() {
+    if (typingActive) return;
+    typingActive = true;
+
+    const t = getTypingTarget();
+    if (!t) return;
+
+    await fetch(API + "/typing/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            user: state.currentUser,
+            targetType: t.targetType,
+            target: t.target
+        })
+    });
+}
+
+async function stopTyping() {
+    typingActive = false;
+
+    await fetch(API + "/typing/stop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user: state.currentUser })
+    });
+}
+
+async function pollTyping() {
+    const t = getTypingTarget();
+    if (!t) {
+        typingIndicator.style.display = "none";
+        return;
+    }
+
+    const res = await fetch(API + "/typing/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(t)
+    });
+
+    const data = await res.json();
+    if (!data.success) return;
+
+    const active = data.typing.filter(u => u !== state.currentUser);
+
+    if (active.length === 0) {
+        typingIndicator.style.display = "none";
+        return;
+    }
+
+    typingIndicator.style.display = "flex";
+
+    if (active.length === 1) {
+        typingText.textContent = `${active[0]} is typing…`;
+    } else {
+        typingText.textContent = `${active.length} people are typing…`;
+    }
+}
+
+function startTypingPoll() {
+    if (typingPollTimer) clearInterval(typingPollTimer);
+    typingPollTimer = setInterval(pollTyping, 800);
+}
+
+/* ============================
+   THEME TOGGLE
+============================ */
+themeToggle.addEventListener("click", () => {
+    if (document.body.classList.contains("red-theme")) {
+        document.body.classList.remove("red-theme");
+        document.body.classList.add("blue-theme");
+    } else if (document.body.classList.contains("blue-theme")) {
+        document.body.classList.remove("blue-theme");
+    } else {
+        document.body.classList.add("red-theme");
+    }
+});
+
+/* ============================
+   RENDER ALL
+============================ */
+function renderAll() {
+    renderServerBar();
+    renderChannels();
+    renderDMs();
+    loadAvatar();
+    loadCurrentView();
+}
+
+/* ============================
+   INIT
+============================ */
+loadState();
+if (state.currentUser) {
+    loginOverlay.style.display = "none";
+    userLabel.textContent = state.currentUser;
+    loadServers().then(() => {
+        renderServerBar();
+        renderAll();
+        startNotificationLoop();
+        startTypingPoll();
+    });
+}
+</script>
+
+</body>
+</html>
