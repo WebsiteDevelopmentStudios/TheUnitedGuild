@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Blemm Launcher ULTRA</title>
+<style>
+:root {
+  --neon-blue: #00f0ff;
+  --neon-purple: #9d00ff;
+  --neon-dark-blue: #004466;
+  --deep-void: #00020a;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 80px 20px 20px;
+  background: radial-gradient(circle at center, #010c28 0%, var(--deep-void) 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Courier New', monospace;
+  color: #e0f7fc;
+  font-size: 11px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* DECORATION: BACKDROP GRID MATRIX */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(157, 0, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+  z-index: 0;
+}
+.matrix-active body::before {
+  animation: gridMove 20s linear infinite;
+}
+@keyframes gridMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 30px 30px; }
+}
+
+.space-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: twinkle 3s infinite ease-in-out;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 0.9; transform: scale(1.3); filter: drop-shadow(0 0 3px var(--neon-blue)); }
+}
+
+/* ANIMATION: ROTATING COMPASS ORBITALS */
+.orbital-ring {
+  position: absolute;
+  border: 1px dashed var(--neon-dark-blue);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.15;
+  display: none;
+}
+.matrix-active .orbital-ring { display: block; }
+#ring1 { width: 600px; height: 600px; animation: rotateCW 40s linear infinite; }
+#ring2 { width: 400px; height: 400px; animation: rotateCCW 25s linear infinite; border-color: var(--neon-purple); }
+
+@keyframes rotateCW { 100% { transform: rotate(360deg); } }
+@keyframes rotateCCW { 100% { transform: rotate(-360deg); } }
+
+.nav-bar {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 50px;
+  background: rgba(1, 4, 15, 0.95);
+  border-bottom: 2px solid var(--neon-blue);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  box-sizing: border-box;
+  z-index: 500;
+  box-shadow: 0 0 15px rgba(0,240,255,0.1);
+}
+.nav-logo {
+  color: var(--neon-blue); font-weight: 900; font-size: 14px; letter-spacing: 2px; text-shadow: 0 0 5px var(--neon-blue);
+}
+.nav-links { display: flex; gap: 15px; }
+.nav-item {
+  padding: 6px 12px; border-radius: 4px; color: #a5f3fc; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: all 0.2s ease;
+}
+.nav-item:hover, .nav-item.active {
+  background: rgba(157, 0, 255, 0.15); color: #fff; box-shadow: 0 0 8px var(--neon-purple);
+}
+
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 1, 5, 0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal-panel {
+  width: 420px; background: rgba(2, 5, 18, 0.95); border: 2px solid var(--neon-purple); border-radius: 12px; padding: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 35px rgba(157,0,255,0.25);
+}
+.modal-close { position: absolute; top: 12px; right: 14px; color: #fff; cursor: pointer; }
+.modal-close:hover { color: var(--neon-blue); }
+.modal-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 320px; overflow-y: auto; padding-right: 4px; }
+
+.menu-selection-row {
+  padding: 10px; background: rgba(1, 4, 15, 0.9); border: 1px solid var(--neon-dark-blue); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; transition: border-color 0.2s;
+}
+.menu-selection-row:hover, .menu-selection-row.current-active { border-color: var(--neon-blue); color: var(--neon-blue); }
+
+/* ANIMATION: PANEL PULSE RESPONSIVE FRAME */
+.panel {
+  width: 460px; padding: 24px; border-radius: 16px; background: rgba(2, 5, 18, 0.85); border: 2px solid var(--neon-blue); box-shadow: 0 0 25px rgba(0, 240, 255, 0.2); display: flex; flex-direction: column; gap: 16px; z-index: 10; box-sizing: border-box; position: relative; overflow: hidden;
+}
+.panel-pulse-active .panel { animation: panelBreath 4s ease-in-out infinite; }
+@keyframes panelBreath {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); }
+  50% { box-shadow: 0 0 35px rgba(0, 240, 255, 0.35), inset 0 0 15px rgba(157,0,255,0.1); }
+}
+
+/* ANIMATION: PANEL OVERLAY HUD SCANLINES */
+.panel::before {
+  content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 240, 255, 0.04) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 4px, 3px 100%; pointer-events: none; z-index: 2;
+}
+
+/* DECORATION: GEOMETRIC PANEL FRAME CONTROLS */
+.corner-decor { position: absolute; width: 12px; height: 12px; border: 2px solid var(--neon-purple); pointer-events: none; }
+.tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+.tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
+.bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
+.br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
+
+.top-status-bar {
+  display: flex; justify-content: space-between; border-bottom: 1px dashed var(--neon-dark-blue); padding-bottom: 6px; font-size: 9px; color: #67e8f9; text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* DECORATION: DIGITAL AUDIO VU EQUALIZER SHADER BARS */
+.vu-equalizer { display: flex; gap: 3px; align-items: flex-end; height: 10px; margin: 0 auto; }
+.vu-bar { width: 3px; height: 100%; background: var(--neon-blue); animation: vuJump 1.2s ease-in-out infinite alternate; transform-origin: bottom; }
+.vu-bar:nth-child(2) { animation-delay: 0.3s; background: var(--neon-purple); }
+.vu-bar:nth-child(3) { animation-delay: 0.6s; }
+.vu-bar:nth-child(4) { animation-delay: 0.1s; background: var(--neon-purple); }
+.vu-bar:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes vuJump {
+  0% { transform: scaleY(0.1); }
+  100% { transform: scaleY(1); filter: drop-shadow(0 0 2px var(--neon-blue)); }
+}
+
+h1 { margin: 0; font-size: 22px; font-weight: 900; color: var(--neon-blue); text-align: center; letter-spacing: 2px; text-shadow: 0 0 8px var(--neon-blue); }
+h2 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em; color: var(--neon-purple); }
+
+.section { padding: 12px; border-radius: 10px; background: rgba(1, 4, 15, 0.9); border: 1px solid var(--neon-dark-blue); position: relative; }
+
+/* DECORATION: NODE IDENTIFIER STAMPS */
+.decor-active .section::before {
+  content: "SYS_NODE_PRIME"; position: absolute; right: 12px; top: -6px; font-size: 7px; background: #020512; padding: 0 4px; color: var(--neon-blue); border: 1px solid var(--neon-dark-blue); border-radius: 3px;
+}
+.spec-buffer::before { content: "STREAM_BUFFER_C2"; }
+.spec-telemetry::before { content: "HARDWARE_STATE_CORE"; }
+.spec-hub::before { content: "ENGINE_DEPLOY_HUB"; }
+
+#progressBarOuter {
+  width: 100%; height: 8px; background: #01030a; border-radius: 3px; overflow: hidden; margin-top: 6px; border: 1px solid var(--neon-dark-blue);
+}
+#progressBarInner {
+  height: 100%; width: 0%; background: var(--neon-blue); box-shadow: 0 0 8px var(--neon-blue); transition: width 0.3s ease;
+}
+#downloadStatus { font-size: 10px; color: #93c5fd; min-height: 14px; margin-top: 4px; font-style: italic; }
+
+.hardware-radar-readout {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 9px; color: #8ab4f8; margin-top: 6px; border-top: 1px solid rgba(0, 68, 102, 0.3); padding-top: 6px;
+}
+
+button {
+  padding: 10px; border-radius: 8px; cursor: pointer; font-family: 'Courier New', monospace; font-size: 11px; font-weight: bold;
+  background: linear-gradient(90deg, var(--neon-dark-blue), var(--neon-purple)); border: 1px solid var(--neon-blue); color: #ffffff; width: 100%; margin-top: 4px; transition: transform 0.1s;
+}
+button:hover { filter: brightness(1.2); box-shadow: 0 0 10px var(--neon-blue); }
+button:active { transform: scale(0.98); }
+
+/* DECORATION: CONSOLE TOGGLE CONFIG (HIDDEN UNTIL TURNED ON IN SETTINGS) */
+.console-box {
+  background: rgba(0, 1, 5, 0.95); border: 1px solid var(--neon-dark-blue); border-radius: 8px; padding: 8px; height: 80px; overflow-y: auto; font-family: monospace; font-size: 10px; color: #67e8f9; display: none; margin-top: 10px;
+}
+.console-line { margin-bottom: 4px; border-bottom: 1px solid rgba(4, 19, 41, 0.3); padding-bottom: 2px; }
+
+.click-particle {
+  position: absolute; background: var(--neon-blue); border-radius: 50%; pointer-events: none; z-index: 999; animation: dynamicExplode 0.5s linear forwards;
+}
+@keyframes dynamicExplode { 0% { width: 4px; height: 4px; opacity: 1; } 100% { width: 0; height: 0; opacity: 0; transform: translate(var(--x), var(--y)); } }
+</style>
+</head>
+<body class="decor-active matrix-active panel-pulse-active">
+
+<div class="space-bg" id="spaceBackground"></div>
+<div class="orbital-ring" id="ring1"></div>
+<div class="orbital-ring" id="ring2"></div>
+
+<div class="nav-bar">
+  <div class="nav-logo">BLEMM_OS_v4.6</div>
+  <div class="nav-links">
+    <div class="nav-item" onclick="openModal('clientModal')">Clients</div>
+    <div class="nav-item" onclick="openModal('settingsModal')">Settings</div>
+  </div>
+</div>
+
+<!-- CLIENT SELECTION MODAL -->
+<div class="modal-overlay" id="clientModal" onclick="closeOnOverlay(event, 'clientModal')">
+  <div class="modal-panel">
+    <div class="modal-close" onclick="closeModal('clientModal')">X</div>
+    <h2>Engine Manifest Vault</h2>
+    <div class="modal-menu-list">
+      <div class="menu-selection-row current-active" id="menu_188" onclick="menuSelectVersion('188')">
+        <span>Eaglercraft v1.8.8 Stable</span>
+      </div>
+      <div class="menu-selection-row" id="menu_1122" onclick="menuSelectVersion('1122')">
+        <span>Eaglercraft v1.12.2 Active</span>
+      </div>
+      <div class="menu-selection-row" style="border-style: dashed; border-color: var(--neon-purple);" onclick="document.getElementById('customClientInput').click()">
+        <span>+ Load Custom Client (.html)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADVANCED SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal" onclick="closeOnOverlay(event, 'settingsModal')">
+  <div class="modal-panel">
+    <div class="modal-close" onclick="closeModal('settingsModal')">X</div>
+    <h2>Console Module Configuration</h2>
+    <div class="modal-menu-list">
+      
+      <div class="menu-selection-row" onclick="toggleOption('anim')">
+        <span>Cursor Click Particles</span>
+        <span id="opt_anim" style="color: #00ff66;">ENABLED</span>
+      </div>
+      
+      <div class="menu-selection-row" onclick="toggleOption('matrix')">
+        <span>Backdrop Space FX & Rings</span>
+        <span id="opt_matrix" style="color: #00ff66;">ENABLED</span>
+      </div>
+
+      <div class="menu-selection-row" onclick="toggleOption('pulse')">
+        <span>Panel Breathing Glow</span>
+        <span id="opt_pulse" style="color: #00ff66;">ENABLED</span>
+      </div>
+      
+      <div class="menu-selection-row" onclick="toggleOption('decor')">
+        <span>HUD Console Decorations</span>
+        <span id="opt_decor" style="color: #00ff66;">ENABLED</span>
+      </div>
+
+      <!-- FIX: NEW TOGGLE SWITCH BUILT DIRECTLY IN FOR DEV CONSOLE DISPLAY VALUES -->
+      <div class="menu-selection-row" onclick="toggleOption('consoleLog')">
+        <span>Dev Diagnostic Console</span>
+        <span id="opt_consoleLog" style="color: #ff0033;">DISABLED</span>
+      </div>
+
+      <div style="font-size: 10px; padding: 4px 0; color: var(--neon-purple); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Hardware Color Core:</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+        <button onclick="setTheme('#00f0ff', '#9d00ff', '#004466')">Cyber Cyan</button>
+        <button onclick="setTheme('#ff5500', '#ff0055', '#441100')">Deep Space</button>
+        <button onclick="setTheme('#00ff66', '#00a6ff', '#003311')">Matrix Code</button>
+        <button onclick="setTheme('#ff00ff', '#00ffff', '#440044')">Synthwave</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="customClientInput" accept=".html" style="display: none;" onchange="handleCustomClientUpload(event)">
+
+<div class="panel" id="dashboardPanel">
+  <div class="corner-decor tl"></div><div class="corner-decor tr"></div><div class="corner-decor bl"></div><div class="corner-decor br"></div>
+  
+  <div class="top-status-bar" id="topStatusBar">
+    <div>SYS_LOC: CO_LAKEWOOD</div>
+    <!-- DECORATION: RESPONSIVE EQUALIZER COMPONENT -->
+    <div class="vu-equalizer" id="vuEqualizer">
+      <div class="vu-bar"></div><div class="vu-bar"></div><div class="vu-bar"></div><div class="vu-bar"></div><div class="vu-bar"></div>
+    </div>
+    <div>HARDWARE_LINK: OPERATIONAL</div>
+  </div>
+
+  <h1>BLEMM LAUNCHER ULTRA</h1>
+
+  <div class="section spec-buffer" id="streamControlSection">
+    <h2> Stream Buffering Control</h2>
+    <div id="downloadStatus">Active Manifest: v1.8.8. Download required.</div>
+    <div id="progressBarOuter"><div id="progressBarInner"></div></div>
+    <button id="downloadBtn" onclick="downloadClient()">Download Client Data</button>
+
+    <div class="hardware-radar-readout" id="radarReadout">
+      <div>BUFFER_RATE: 4.2 MB/s</div>
+      <div>PACKET_LINK: 100.0% SECURE</div>
+    </div>
+  </div>
+
+  <div class="section spec-telemetry" id="telemetrySection">
+    <h2> Cybernetic Status Readout</h2>
+    <div class="hardware-radar-readout" style="border:none; margin:0; padding:0;">
+      <div>CORE_TEMP: 41°C STABLE</div>
+      <div>VOLTAGE_LOAD: 1.21V NOMINAL</div>
+    </div>
+  </div>
+
+  <div class="section spec-hub">
+    <h2> Quantum Operational Hub</h2>
+    <button id="launchBtn" onclick="launchClient()">LAUNCH SECURE INSTANCE</button>
+  </div>
+
+  <!-- FIX: Console starts completely hidden via CSS, controlled dynamically by settings options -->
+  <div class="console-box" id="diagnosticConsole">
+    <div class="console-line">[System] Pipeline cleared. Dev console tracking linked.</div>
+  </div>
+</div>
+
+<script>
+const VERSIONS = [
+  { id: "188", name: "v1.8.8", mirror: "https://eaglercraft.win" },
+  { id: "1122", name: "v1.12.2", mirror: "https://eaglercraft.win" }
+];
+let selectedVersionId = "188", customClientRAMCache = "", downloadedClients = {};
+let flags = { anim: true, matrix: true, pulse: true, decor: true, consoleLog: false };
+
+function logToConsole(msg) {
+  const box = document.getElementById("diagnosticConsole");
+  if (!box) return;
+  const line = document.createElement("div");
+  line.className = "console-line";
+  line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+/* DECORATION CONSOLE ENGINE STREAMS */
+function buildSpace() {
+  const bg = document.getElementById("spaceBackground");
+  if (!bg) return;
+  bg.innerHTML = "";
+  if (!flags.matrix) return;
+  for (let i = 0; i < 45; i++) {
+    const star = document.createElement("div");
+    star.className = "star";
+    star.style.width = star.style.height = (Math.random() * 2 + 1) + "px";
+    star.style.top = (Math.random() * 100) + "vh";
+    star.style.left = (Math.random() * 100) + "vw";
+    star.style.animationDelay = (Math.random() * 3) + "s";
+    bg.appendChild(star);
+  }
+}
+buildSpace();
+
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+function closeOnOverlay(e, id) { if (e.target.id === id) closeModal(id); }
+
+/* MULTI-TOGGLE OPTIONS HANDLER ROUTINES */
+function toggleOption(key) {
+  flags[key] = !flags[key];
+  const el = document.getElementById(`opt_${key}`);
+  el.textContent = flags[key] ? "ENABLED" : "DISABLED";
+  el.style.color = flags[key] ? "#00ff66" : "#ff0033";
+  
+  if (key === 'matrix') {
+    document.body.classList.toggle("matrix-active", flags.matrix);
+    buildSpace();
+  }
+  if (key === 'pulse') {
+    document.body.classList.toggle("panel-pulse-active", flags.pulse);
+  }
+  if (key === 'consoleLog') {
+    // FIX: Toggles visibility parameters of the diagnostic console element directly inside real-time layout structures
+    document.getElementById("diagnosticConsole").style.display = flags.consoleLog ? "block" : "none";
+  }
+  if (key === 'decor') {
+    document.body.classList.toggle("decor-active", flags.decor);
+    document.querySelectorAll(".corner-decor").forEach(d => d.style.display = flags.decor ? "block" : "none");
+    document.getElementById("topStatusBar").style.display = flags.decor ? "flex" : "none";
+    document.getElementById("radarReadout").style.display = flags.decor ? "grid" : "none";
+    document.getElementById("telemetrySection").style.display = flags.decor ? "block" : "none";
+  }
+  logToConsole(`Console state matrix module [${key.toUpperCase()}] mapped to ${flags[key] ? 'active' : 'idle'}.`);
+}
+
+function setTheme(b, p, db) {
+  const r = document.documentElement.style;
+  r.setProperty('--neon-blue', b);
+  r.setProperty('--neon-purple', p);
+  r.setProperty('--neon-dark-blue', db);
+  logToConsole("System registers swapped to new colorway mapping.");
+}
+
+document.addEventListener('click', function(e) {
+  if (!flags.anim || e.target.closest('.nav-bar') || e.target.closest('.modal-panel')) return;
+  for (let i = 0; i < 8; i++) {
+    const p = document.createElement('div');
+    p.className = 'click-particle';
+    p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+    const angle = Math.random() * Math.PI * 2, velocity = Math.random() * 40 + 15;
+    p.style.setProperty('--x', `${Math.cos(angle) * velocity}px`);
+    p.style.setProperty('--y', `${Math.sin(angle) * velocity}px`);
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 500);
+  }
+});
+
+/* ENGINE PIPELINE LOGIC */
+function menuSelectVersion(id) {
+  selectedVersionId = id;
+  document.querySelectorAll(".menu-selection-row").forEach(r => r.classList.remove("current-active"));
+  document.getElementById("menu_" + id).classList.add("current-active");
+  
+  const current = VERSIONS.find(v => v.id === id);
+  document.getElementById("downloadStatus").textContent = `Active Manifest: ${current.name}. ` + (downloadedClients[id] ? "Buffered in RAM." : "Download required.");
+  document.getElementById("progressBarInner").style.width = downloadedClients[id] ? "100%" : "0%";
+  
+  logToConsole(`Target manifest loaded: ${current.name}`);
+  closeModal('clientModal');
+  if(!downloadedClients[id]) downloadClient();
+}
+
+function handleCustomClientUpload(e) {
+  const files = e.target.files;
+  if (!files || files.length === 0) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    customClientRAMCache = evt.target.result;
+    selectedVersionId = "custom_ram_cache";
+    const customId = "custom_ram_cache";
+    const idx = VERSIONS.findIndex(v => v.id === customId);
+    if (idx > -1) VERSIONS.splice(idx, 1);
+    VERSIONS.push({ id: customId, name: "Local HTML Client", mirror: "" });
+    
+    document.querySelectorAll(".menu-selection-row").forEach(r => r.classList.remove("current-active"));
+    document.getElementById("downloadStatus").textContent = "Active Manifest: External HTML layer mounted.";
+    document.getElementById("progressBarInner").style.width = "100%";
+    
+    logToConsole("Custom standalone client script buffered.");
+    closeModal('clientModal');
+  };
+  reader.readAsText(files.item(0));
+}
+
+async function downloadClient() {
+  const current = VERSIONS.find(v => v.id === selectedVersionId);
+  if (!current || current.id === "custom_ram_cache") return;
+
+  logToConsole(`Buffering pipeline fetch for: ${current.name}...`);
+  const dlStatus = document.getElementById("downloadStatus");
+  const progressInner = document.getElementById("progressBarInner");
+  dlStatus.textContent = "Downloading engine core...";
+  progressInner.style.width = "40%";
+
+  try {
+    const response = await fetch(current.mirror);
+    if (!response.ok) throw new Error();
+    downloadedClients[current.id] = await response.text();
+    progressInner.style.width = "100%";
+    dlStatus.textContent = `Active Manifest: ${current.name}. Buffered and ready.`;
+    logToConsole(`Engine payload successfully stored for version: ${current.name}.`);
+  } catch (err) {
+    progressInner.style.width = "0%";
+    dlStatus.textContent = "Mirror connection failed.";
+    logToConsole(`ERR: Download handshake refused by Gitea endpoint.`);
+  }
+}
+
+function launchClient() {
+  const current = VERSIONS.find(v => v.id === selectedVersionId);
+  if (current.id !== "custom_ram_cache" && !downloadedClients[current.id]) {
+    alert("Please hit 'Download Client Data' first!"); return;
+  }
+
+  logToConsole(`Spawning instance profile tab for: ${current.name}...`);
+  const newTab = window.open("about:blank", "_blank");
+  if (!newTab) { alert("Please allow popups to launch the instance!"); return; }
+
+  newTab.eaglercraftOpts = {
+    container: "game_frame",
+    assetsURI: "https://eaglercraft.win",
+    servers: [{ addr: "wss://xena.wtf", name: "Main server" }],
+    preloadedResourcePacks: []
+  };
+  newTab.eaglercraftXOpts = Object.assign({}, newTab.eaglercraftOpts);
+
+  const dynamicHTMLContent = current.id === "custom_ram_cache" ? customClientRAMCache : `
+    <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Blemm Instance</title>
+    <style>body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000;}#game_frame{width:100%;height:100%;}</style>
+    </head><body><div id="game_frame"></div><script>
+      try{localStorage.removeItem("servers");localStorage.removeItem("userdata");}catch(e){}
+      window.eaglercraftOpts = window.opener.eaglercraftOpts;
+      window.eaglercraftXOpts = window.opener.eaglercraftXOpts;
+      ${downloadedClients[current.id]}
+    <\/script></body></html>`;
+
+  window.eaglercraftOpts = newTab.eaglercraftOpts;
+  window.eaglercraftXOpts = newTab.eaglercraftXOpts;
+
+  const doc = newTab.document;
+  doc.open(); doc.write(dynamicHTMLContent); doc.close();
+  logToConsole("Handshake established. Sandbox container runtime active.");
+}
+</script>
+</body>
+</html>
